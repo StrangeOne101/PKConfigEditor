@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -247,7 +248,33 @@ public class ConfigCommandBase extends PKCommand {
 	
 	@Override
 	protected List<String> getTabCompletion(CommandSender sender, List<String> args) {
+		if (!hasPermission(sender)) return new ArrayList<String>();
 		if (args.size() == 0) return Arrays.asList(new String[] {"add", "get", "set", "gui"});
+		if (args.get(0).equalsIgnoreCase("gui")) return new ArrayList<String>();
+		
+		if (args.size() == 1 || args.size() == 2) {
+			String path = "";
+			if (args.size() >= 1) path = args.get(1);
+			if (path.endsWith(".")) path = path.substring(0, path.length() - 1);
+			if (this.config.get().isConfigurationSection(path)) {
+				ConfigurationSection section = this.config.get().getConfigurationSection(path);
+				List<String> list = new ArrayList<String>();
+				list.addAll(section.getKeys(false));
+				return list;
+			} else {
+				List<String> list = new ArrayList<String>();
+				list.addAll(this.config.get().getKeys(false));
+				return list;
+			}
+		} else if (args.size() == 3) {
+			if (this.config.get().contains(args.get(1))) {
+				Object o = this.config.get().get(args.get(1));
+				if (!(o instanceof List))
+				return Arrays.asList(new String[] {this.config.get().get(args.get(1)).toString()});
+			}
+		}
+		
+		
 		
 		return super.getTabCompletion(sender, args);
 	}
