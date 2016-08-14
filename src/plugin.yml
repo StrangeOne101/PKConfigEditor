@@ -10,4 +10,10 @@ permissions:
   bending.command.config.gui:
     default: op
     description: Allows the user to edit the ProjectKorra config with a GUI
+  bending.command.langconfig:
+    default: op
+    description: Allows the user to edit the ProjectKorra config via command
+  bending.command.langconfig.gui:
+    default: op
+    description: Allows the user to edit the ProjectKorra config with a GUI
    

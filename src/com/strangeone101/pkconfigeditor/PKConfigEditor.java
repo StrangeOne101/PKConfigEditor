@@ -14,6 +14,7 @@ public class PKConfigEditor extends JavaPlugin
 		plugin = this;
 		
 		new ConfigCommand();
+		new LangConfigCommand();
 		
 		this.getLogger().info("PKConfigEditor loaded!");
 	}
