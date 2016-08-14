@@ -1,0 +1,13 @@
+name: PKConfigEditor
+author: StrangeOne101
+version: 1.0
+main: com.strangeone101.pkconfigeditor.PKConfigEditor
+depend: [ProjectKorra]
+permissions:
+  bending.command.config:
+    default: op
+    description: Allows the user to edit the ProjectKorra config via command
+  bending.command.config.gui:
+    default: op
+    description: Allows the user to edit the ProjectKorra config with a GUI
+   
