@@ -75,7 +75,7 @@ public class ConfigCommandBase extends PKCommand {
 						input = s.substring(1);
 					}
 					this.config.get().set(path, convert(value, input));
-					sender.sendMessage(ChatColor.YELLOW + "Config option set!");
+					sender.sendMessage(ChatColor.YELLOW + "Config option set! Value is now \"" + value.toString() + "\"");
 					if (sender instanceof Player) {
 						remind((Player) sender);
 					}
@@ -137,6 +137,20 @@ public class ConfigCommandBase extends PKCommand {
 						s = s.substring(1);
 						value = ((String) value) + s;
 						sender.sendMessage(ChatColor.YELLOW + "Text added to config option! Value is now \"" + value.toString() + "\"");
+					} else if (value instanceof List) {
+						List<String> args2 = args;
+						args2.remove(0);
+						args2.remove(0); //Remove first 2 args
+						String s = "";
+						for (String s1 : args2) {
+							s = s + " " + s1;
+						}
+						s = s.substring(1);
+						@SuppressWarnings("unchecked")
+						List<String> list = (List<String>) value;
+						list.add(s);
+						value = list;
+						sender.sendMessage(ChatColor.YELLOW + "Text added to the config option (list)!");
 					} else {
 						sender.sendMessage(ChatColor.RED + "Cannot set the value to a value different to what's in the config!");
 						return;
