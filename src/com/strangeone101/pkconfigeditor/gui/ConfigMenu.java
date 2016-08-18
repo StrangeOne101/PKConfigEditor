@@ -140,6 +140,7 @@ public class ConfigMenu extends MenuBase {
 		return 0;
 	}
 
+	@SuppressWarnings("deprecation")
 	protected void update() {
 		this.clearInventory();
 		
@@ -171,12 +172,20 @@ public class ConfigMenu extends MenuBase {
 				ConfigurationSection section = ConfigManager.defaultConfig.get().getConfigurationSection(path);
 				int index = 0;
 				Set<String> keys = section.getKeys(false);
-				boolean isCombo = path.split("\\.")[2].toLowerCase().contains("combo");
+				final boolean isCombo = path.split("\\.").length == 3 && path.split("\\.")[2].toLowerCase().contains("combo");
 				for (String key : keys) {
 					final String key_ = key;
 					String name = key;
 					String meta = name;
 					MaterialData icon;
+					int indexToUse = index;
+					if (isCombo && key.equalsIgnoreCase("enabled")) {
+						boolean enabled = ConfigManager.defaultConfig.get().getBoolean(path + ".Enabled");
+						icon = new MaterialData(Material.WOOL, (byte) (enabled ? 5 : 14));
+						name = enabled ? ChatColor.GREEN + "Enabled" : ChatColor.RED + "Disabled";
+						meta = enabled ? "enabled" : "disabled";
+						indexToUse = 0;
+					}
 					if (key.equalsIgnoreCase("Passive")) {
 						icon = getElementMaterial(element);
 						name = element.getName() + " Passive";
@@ -196,11 +205,22 @@ public class ConfigMenu extends MenuBase {
 
 						@Override
 						public void onClick(Player player) {
-							changeLocation(path + "." + key_);
+							if (isCombo && key_.equalsIgnoreCase("enabled")) {
+								ConfigManager.defaultConfig.get().set(path + ".Enabled", !ConfigManager.defaultConfig.get().getBoolean(path + ".Enabled"));
+								changesMade = true;
+								update();
+							} else {
+								changeLocation(path + "." + key_);
+							}
+							
 						}
 					};
-					item.addDescription(ChatColor.GRAY + "Edit the config options for " + meta);
-					this.addMenuItem(item, getIndex(index, keys.size()) + (isCombo ? 1 : 0)); //Combos are offset by 1 because of the enabled/disabled button
+					if (!isCombo) item.addDescription(ChatColor.GRAY + "Edit the config options for " + meta);
+					else {
+						item.addDescription(ChatColor.GRAY + element.getName() + " Combos are currently " + meta);
+						item.addDescription(ChatColor.GRAY + "Click to toggle them off/on");
+					}
+					this.addMenuItem(item, getIndex(indexToUse, keys.size()) + (isCombo ? 1 : 0)); //Combos are offset by 1 because of the enabled/disabled button
 					index++;
 				}
 			}
