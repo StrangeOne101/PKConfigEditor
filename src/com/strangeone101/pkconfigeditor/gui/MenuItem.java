@@ -15,7 +15,7 @@ public abstract class MenuItem{
 	protected int number;
 	protected MaterialData icon;
 	protected String text;
-	protected boolean isShiftClicked = false;
+	public boolean isShiftClicked = false;
 	protected boolean isEnchanted = false;
 	
 	public MenuItem(String text, MaterialData icon, int number) 

@@ -1,6 +1,7 @@
 package com.strangeone101.pkconfigeditor.gui;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -16,7 +17,7 @@ import com.strangeone101.pkconfigeditor.PKConfigEditor;
 
 public class MenuBase implements InventoryHolder {
 
-	protected HashMap<Integer, MenuItem> items = new HashMap<Integer, MenuItem>();
+	protected Map<Integer, MenuItem> items = new HashMap<Integer, MenuItem>();
     protected Inventory inventory;
     protected String title;
     protected int size;
@@ -84,8 +85,14 @@ public class MenuBase implements InventoryHolder {
             return false;
         }
         getInventory().clear(index);
+        items.remove(items.get(index));
         //items.remove(index).removeFromMenu(this);
         return true;
+    }
+    
+    public void clearInventory() {
+    	getInventory().clear();
+    	items.clear();
     }
     
     
@@ -100,7 +107,7 @@ public class MenuBase implements InventoryHolder {
         }
     }
     
-    protected MenuItem getMenuItem(int index)
+    public MenuItem getMenuItem(int index)
     {
     	if (items.containsKey(index) && this.getInventory().getItem(index) != null) 
         {

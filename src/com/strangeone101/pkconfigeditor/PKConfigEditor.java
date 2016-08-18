@@ -1,5 +1,6 @@
 package com.strangeone101.pkconfigeditor;
 
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class PKConfigEditor extends JavaPlugin
@@ -15,6 +16,8 @@ public class PKConfigEditor extends JavaPlugin
 		
 		new ConfigCommand();
 		new LangConfigCommand();
+		
+		Bukkit.getPluginManager().registerEvents(new GUIListener(), this);
 		
 		this.getLogger().info("PKConfigEditor loaded!");
 	}

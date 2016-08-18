@@ -13,6 +13,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import com.projectkorra.projectkorra.command.PKCommand;
 import com.projectkorra.projectkorra.configuration.Config;
+import com.strangeone101.pkconfigeditor.gui.ConfigMenu;
 
 public class ConfigCommandBase extends PKCommand {
 
@@ -23,6 +24,7 @@ public class ConfigCommandBase extends PKCommand {
 	public ConfigCommandBase(Config config, String name, String usage, String desc, String... aliases) {
 		super(name, usage, desc, aliases);
 		this.reminders = new ArrayList<UUID>();
+		this.config = config;
 	}
 
 	@Override
@@ -42,13 +44,20 @@ public class ConfigCommandBase extends PKCommand {
 				return;
 			}
 			
-			sender.sendMessage(ChatColor.GREEN + "This feature is coming soon! Sorry about that!");
+			if (!(sender instanceof Player)) {
+				sender.sendMessage(ChatColor.RED + "Only players can run this command!");
+				return;
+			}
+			
+			//sender.sendMessage(ChatColor.GREEN + "This feature is coming soon! Sorry about that!");
 			//TODO Make the gui
+			
+			new ConfigMenu((Player) sender, null);
 			
 			return;
 		} else if (args.get(0).equalsIgnoreCase("get")) {
 			String path = args.get(0);
-			if (this.config.get().contains(path)) {
+			if (this.config.get().get(path) != null) {
 				String value = this.config.get().get(path).toString().toUpperCase();
 				sender.sendMessage(ChatColor.YELLOW + "Value of '" + path + "' is " + value);
 			} else {
@@ -98,6 +107,10 @@ public class ConfigCommandBase extends PKCommand {
 			} else {
 				sender.sendMessage(ChatColor.RED + "Config value not found! Please use TAB to autcomplete the command if you need help.");
 			}
+		} else if (args.get(0).equalsIgnoreCase("debug12345")) {
+			
+			sender.sendMessage(this.config.get().getConfigurationSection(args.get(1)) + " | " + this.config.get().getCurrentPath());
+			
 		} else if (args.get(0).equalsIgnoreCase("add")) {
 			if (args.size() == 2) {
 				sender.sendMessage(ChatColor.RED + "Please specify both a config option and a value to add!");
@@ -254,7 +267,7 @@ public class ConfigCommandBase extends PKCommand {
 		
 		if (args.size() == 1 || args.size() == 2) {
 			String path = "";
-			if (args.size() >= 1) path = args.get(1);
+			if (args.size() > 2) path = args.get(1);
 			if (path.endsWith(".")) path = path.substring(0, path.length() - 1);
 			if (this.config.get().isConfigurationSection(path)) {
 				ConfigurationSection section = this.config.get().getConfigurationSection(path);
