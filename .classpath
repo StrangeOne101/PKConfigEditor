@@ -2,7 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
-	<classpathentry kind="lib" path="/Volumes/OS/Projects/Bukkit Plugins/ProjectKorra/lib/spigot-1.8.7.jar"/>
-	<classpathentry kind="lib" path="/Users/Mr_Strange/Desktop/ProjectKorra 1.8.0 Stable.jar"/>
+	<classpathentry kind="lib" path="C:/Users/stran/Documents/EnderBenders/Main 1.9/spigot-1.10.jar"/>
+	<classpathentry kind="lib" path="C:/Users/stran/Documents/EnderBenders/Main 1.9/plugins/ProjectKorra.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

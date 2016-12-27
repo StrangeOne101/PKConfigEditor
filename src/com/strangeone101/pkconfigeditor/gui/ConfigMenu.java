@@ -1,6 +1,7 @@
 package com.strangeone101.pkconfigeditor.gui;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.bukkit.ChatColor;
@@ -18,8 +19,7 @@ import com.projectkorra.projectkorra.configuration.ConfigManager;
 public class ConfigMenu extends MenuBase {
 
 	public Player player;
-	@Deprecated
-	public MenuBase prev;
+	
 	public boolean changesMade = false;
 	
 	public String path;
@@ -45,13 +45,18 @@ public class ConfigMenu extends MenuBase {
 	}
 	
 	public MenuItem getBackArrow() {
-		MenuItem item = new MenuItem(ChatColor.YELLOW + (this.prev == null ? "Exit Menu" : "Back"), new MaterialData(Material.ARROW)) {
+		MenuItem item = new MenuItem(ChatColor.YELLOW + (pastPaths.size() == 0 ? "Exit Menu" : "Back"), new MaterialData(Material.ARROW)) {
 			@Override
 			public void onClick(Player player) {
-				changeLocation(prevPath);
+				if (path == null) {
+					closeMenu(player);
+				} else {
+					changeLocation(prevPath);
+				}
+				
 			}
 		};
-		if (prev == null) {
+		if (pastPaths.size() == 0) {
 			item.addDescription(ChatColor.GRAY + "Click to exit the menu. Don't forget to save!");
 		} else {
 			item.addDescription(ChatColor.GRAY + "Click to go back to the previous menu");
@@ -66,6 +71,7 @@ public class ConfigMenu extends MenuBase {
 			@Override
 			public void onClick(Player player) {
 				if (changesMade) {
+					ConfigManager.defaultConfig.save();
 					GeneralMethods.reloadPlugin(player);
 					changesMade = false;
 					update();
@@ -95,6 +101,71 @@ public class ConfigMenu extends MenuBase {
 		item.addDescription(ChatColor.GRAY + "Allows you to edit all config options for " + element.getName());
 		
 		return item;
+	}
+	
+	@SuppressWarnings("deprecation")
+	public void addOptionsForMove(final String path, Element element) {
+		ConfigurationSection section = ConfigManager.defaultConfig.get().getConfigurationSection(path);
+		
+		int count = 0;
+		
+		for (final String key : section.getKeys(false)) {
+			MenuItem item = null;
+			if (ConfigManager.defaultConfig.get().get(path + "." + key) instanceof Boolean) {
+				final boolean enabled = ConfigManager.defaultConfig.get().getBoolean(path + "." + key);
+				String name = enabled ? (ChatColor.GREEN + key + ": True") : (ChatColor.RED + key + ": False");
+				item = new MenuItem(name, new MaterialData(Material.WOOL, enabled ? (byte) 5 : (byte) 14)) {
+
+					@Override
+					public void onClick(Player player) {
+						ConfigManager.defaultConfig.get().set(path + "." + key, !enabled);
+						changesMade = true;
+						update();
+					}
+				};
+				item.addDescription(ChatColor.GRAY + "Click to toggle the " + key + " option");
+			} else if (ConfigManager.defaultConfig.get().get(path + "." + key) instanceof ConfigurationSection) {
+				item = new MenuItem(element.getColor() + key, getElementMaterial(element)) {
+
+					@Override
+					public void onClick(Player player) {
+						changeLocation(path + "." + key);						
+					}
+				};
+				item.addDescription(ChatColor.GRAY + "Click to edit the " + key + " options");
+			} else if (ConfigManager.defaultConfig.get().get(path + "." + key) instanceof List) {
+				item = new MenuItem(element.getColor() + key, getElementMaterial(element)) {
+
+					@Override
+					public void onClick(Player player) {	
+						//Do nothing as of yet
+					}
+				};
+				item.addDescription(ChatColor.RED + "Must be editted in the config");
+			} else if (ConfigManager.defaultConfig.get().get(path + "." + key) instanceof String) {
+				item = new MenuItem(element.getColor() + key, getElementMaterial(element)) {
+
+					@Override
+					public void onClick(Player player) {	
+						//Do nothing as of yet
+					}
+				};
+				item.addDescription(ChatColor.RED + "Must be editted in the config");
+			} else {
+				final ConfigMenu menu_ = this;
+				item = new MenuItem(element.getColor() + key + ": " + ConfigManager.defaultConfig.get().get(path + "." + key).toString(), getElementMaterial(element)) {
+
+					@Override
+					public void onClick(Player player) {
+						switchMenu(player, new ValueEditorMenu(player, menu_, path + "." + key));		
+					}
+				};
+				item.addDescription(ChatColor.GRAY + "Click to edit the value");
+			}
+			
+			addMenuItem(item, getIndex(count, section.getKeys(false).size()));
+			count++;
+		}
 	}
 	
 	@SuppressWarnings("deprecation")
@@ -215,14 +286,13 @@ public class ConfigMenu extends MenuBase {
 							
 						}
 					};
-					if (!isCombo) item.addDescription(ChatColor.GRAY + "Edit the config options for " + meta);
-					else {
-						item.addDescription(ChatColor.GRAY + element.getName() + " Combos are currently " + meta);
-						item.addDescription(ChatColor.GRAY + "Click to toggle them off/on");
-					}
+					
+					item.addDescription(ChatColor.GRAY + "Edit the config options for " + meta);
 					this.addMenuItem(item, getIndex(indexToUse, keys.size()) + (isCombo ? 1 : 0)); //Combos are offset by 1 because of the enabled/disabled button
 					index++;
 				}
+			} else if (path.split("\\.").length > 2) {
+				addOptionsForMove(path, element);
 			}
 		}
 	}
@@ -230,7 +300,7 @@ public class ConfigMenu extends MenuBase {
 	public void changeLocation(String newPath) {
 		if (newPath == null || newPath.equals(this.prevPath)) {
 			this.path = newPath;
-			this.prevPath = (String) this.pastPaths.toArray()[this.pastPaths.size() - 1];
+			this.prevPath = newPath == null ? null : (String) this.pastPaths.toArray()[this.pastPaths.size() - 1];
 			this.pastPaths.remove(this.prevPath);
 		} else {
 			this.pastPaths.add(this.prevPath);
