@@ -15,6 +15,8 @@ import com.projectkorra.projectkorra.Element.SubElement;
 import com.projectkorra.projectkorra.GeneralMethods;
 import com.projectkorra.projectkorra.ability.CoreAbility;
 import com.projectkorra.projectkorra.configuration.ConfigManager;
+import com.strangeone101.easygui.MenuBase;
+import com.strangeone101.easygui.MenuItem;
 
 public class ConfigMenu extends MenuBase {
 
@@ -203,7 +205,7 @@ public class ConfigMenu extends MenuBase {
 		} else if (max <= 14){
 			return ((counter % 7) + 1) + ((counter / 7) * 9) + 9; //1 row down, 1 across but supports 2 rows & up to 14 icons
 		} else if (max <= 21) {
-			return ((counter % 7) + 1) + ((counter / 7) * 9); //Just 3 rows of 7
+			return ((counter % 7) + 1) + ((counter / 7) * 9) + 9; //Just 3 rows of 7
 		} else if (max <= 32) {
 			return counter + (counter >= 26 ? 2 : 0); //Now do rows of 9 with 5 in the middle at the bottom
 		}
@@ -216,7 +218,10 @@ public class ConfigMenu extends MenuBase {
 		this.clearInventory();
 		
 		this.addMenuItem(getBackArrow(), 0, 4);
-		this.addMenuItem(getSaveItem(), 8, 4);
+		if (path != null && !path.equals("")) {
+			this.addMenuItem(getSaveItem(), 8, 4);
+		}
+		
 		
 		if (path == null || path.equals("")) {
 			this.addMenuItem(getAbilityConfig(Element.AIR), 2, 1);
@@ -288,7 +293,7 @@ public class ConfigMenu extends MenuBase {
 					};
 					
 					item.addDescription(ChatColor.GRAY + "Edit the config options for " + meta);
-					this.addMenuItem(item, getIndex(indexToUse, keys.size()) + (isCombo ? 1 : 0)); //Combos are offset by 1 because of the enabled/disabled button
+					this.addMenuItem(item, getIndex(indexToUse + (isCombo ? 1 : 0), keys.size())); //Combos are offset by 1 because of the enabled/disabled button
 					index++;
 				}
 			} else if (path.split("\\.").length > 2) {

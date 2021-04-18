@@ -3,6 +3,8 @@ package com.strangeone101.pkconfigeditor;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.strangeone101.easygui.MenuListener;
+
 public class PKConfigEditor extends JavaPlugin
 {
 
@@ -17,7 +19,7 @@ public class PKConfigEditor extends JavaPlugin
 		new ConfigCommand();
 		new LangConfigCommand();
 		
-		Bukkit.getPluginManager().registerEvents(new GUIListener(), this);
+		new MenuListener(this);
 		
 		this.getLogger().info("PKConfigEditor loaded!");
 	}

@@ -6,13 +6,18 @@ import org.bukkit.entity.Player;
 import org.bukkit.material.MaterialData;
 
 import com.projectkorra.projectkorra.Element;
+import com.projectkorra.projectkorra.GeneralMethods;
 import com.projectkorra.projectkorra.configuration.ConfigManager;
+import com.strangeone101.easygui.MenuBase;
+import com.strangeone101.easygui.MenuItem;
 
 public class ValueEditorMenu extends MenuBase {
 
 	public ConfigMenu prev;
 	public String path;
 	public Player player;
+	public Object baseObj;
+	public Object obj;
 	
 	public ValueEditorMenu(Player player, ConfigMenu previous, String path) {
 		super("PK Config Editor", 5);
@@ -21,18 +26,20 @@ public class ValueEditorMenu extends MenuBase {
 		this.path = path;
 		this.player = player;
 		
+		baseObj = ConfigManager.defaultConfig.get().get(path);
+		obj = baseObj;
+		
 		update();
-		
 		openMenu(player);
-		
 	}
 
 	private void update() {
 		this.clearInventory();
 		
 		this.addMenuItem(getBackArrow(), 0, 4);
+		this.addMenuItem(getSaveItem(), 8, 4);
 		//player.sendMessage(path);
-		Object o = ConfigManager.defaultConfig.get().get(path);
+		Object o = obj;
 		Element element = Element.fromString(path.split("\\.")[1]);
 		
 		this.addMenuItem(getAjustArrow(o, (byte)-3), 1, 2);
@@ -245,7 +252,7 @@ public class ValueEditorMenu extends MenuBase {
 			title = "+" + title;
 		}
 		
-		MenuItem item = new MenuItem(ChatColor.YELLOW + title, new MaterialData(Material.ARROW)) {
+		MenuItem item = new MenuItem(ChatColor.YELLOW + title, new MaterialData(Material.ARROW), Math.abs(type)) {
 			@Override
 			public void onClick(Player player) {
 				Object newObject = -1;
@@ -258,14 +265,16 @@ public class ValueEditorMenu extends MenuBase {
 					newObject = ((double)originalValue) + (double)newToAdd;
 				}
 				
-				ConfigManager.defaultConfig.get().set(path, newObject);
-				update();
+				obj = newObject;
 				prev.changesMade = true;
+				update();
 			}
 		};
 		
 		item.addDescription(ChatColor.GRAY + "Click to add this value");
-		item.addDescription(ChatColor.GRAY + "Current value: " + originalValue.toString());
+		item.addDescription(ChatColor.GRAY + "Current value: " + ChatColor.YELLOW + originalValue.toString());
+		if (!obj.equals(baseObj))
+		item.addDescription(ChatColor.GRAY + "Original value: " + ChatColor.YELLOW + baseObj.toString());
 
 		return item;
 	}
@@ -277,6 +286,33 @@ public class ValueEditorMenu extends MenuBase {
 		};
 		
 		item.addDescription(ChatColor.GRAY + "Adjust the value with the arrows");
+		return item;
+	}
+	
+	public MenuItem getSaveItem() {
+		@SuppressWarnings("deprecation")
+		MenuItem item = new MenuItem((prev.changesMade ? ChatColor.GREEN : ChatColor.YELLOW) + "Save Changes", new MaterialData(Material.STAINED_GLASS_PANE, (byte) (prev.changesMade ? 5 : 7))) {
+			@Override
+			public void onClick(Player player) {
+				if (prev.changesMade) {
+					ConfigManager.defaultConfig.get().set(path, obj);
+					baseObj = obj;
+					ConfigManager.defaultConfig.save();
+					GeneralMethods.reloadPlugin(player);
+					prev.changesMade = false;
+					update();
+				}
+				
+			}
+		};
+		
+		if (prev.changesMade) {
+			item.addDescription(ChatColor.GRAY + "Click to save changes to the config!");
+			item.addDescription(ChatColor.RED + "Warning: " + ChatColor.GRAY + "This will reload bending!");
+		} else {
+			item.addDescription(ChatColor.GRAY + "You have not made any changes to the config!");
+		}
+		
 		return item;
 	}
 

@@ -1,22 +1,26 @@
-package com.strangeone101.pkconfigeditor.gui;
+package com.strangeone101.easygui;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.MaterialData;
 
 public abstract class MenuItem{
 
-	protected List<String> lore = new ArrayList<String>();
-	protected MenuBase menu;
-	protected int number;
-	protected MaterialData icon;
-	protected String text;
-	public boolean isShiftClicked = false;
-	protected boolean isEnchanted = false;
+	private List<String> lore = new ArrayList<String>();
+	private MenuBase menu;
+	private int number;
+	private MaterialData icon;
+	private String text;
+	private boolean shiftClicked = false;
+	private boolean enchanted = false;
+	private boolean rightClicked = false;
+	private ItemStack cursor = null;
 	
 	public MenuItem(String text, MaterialData icon, int number) 
 	{
@@ -32,7 +36,7 @@ public abstract class MenuItem{
 	
 	public void setEnchanted(boolean bool)
 	{
-		this.isEnchanted = bool;
+		this.enchanted = bool;
 	}
 	
 	public MenuBase getMenu() {
@@ -59,34 +63,63 @@ public abstract class MenuItem{
         meta.setLore(lore);
         meta.setDisplayName(getText());
         slot.setItemMeta(meta);
+        if (enchanted) {
+        	meta.addEnchant(Enchantment.LURE, 1, false );
+            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS );
+        }
         //net.minecraft.server.v1_8_R3.ItemStack stack1 = CraftItemStack.asNMSCopy(slot);
         //stack1.setTag(this.getNBTData());
         return slot;//CraftItemStack.asCraftMirror(stack1);
 	}
 
-	/***DO NOT USE PLAYER VARIABLE IF USING MenuBendingOptions! Use the class' player variable instead! This causes
-	 * problems when looking at other player's menus. Called when a player clicks on the item.
-	 * @param player The player clicking*/
+	/**
+	 * Called when a player clicks on the item.
+	 * @param player The player clicking
+	 * */
 	public abstract void onClick(Player player);
 	
-	public void setDescriptions(List<String> lines) 
-	{
+	public void setDescriptions(List<String> lines) {
 		this.lore = lines;
 	}
 	
-	public void addDescription(String line)
-	{
+	public void addDescription(String line) {
 		this.lore.add(line);
 	}
 	
-	public void setMenu(MenuBase menu)
-	{
+	public void setMenu(MenuBase menu) {
 		this.menu = menu;
 	}
 	
-	public boolean isShiftClicked()
-	{
-		return this.isShiftClicked;
+	protected void setShiftClick(boolean bool) {
+		this.shiftClicked = bool;
+	}
+	
+	protected void setCursor(ItemStack cursor) {
+		this.cursor = cursor;
+	}
+	
+	protected void setRightClicked(boolean rightClicked) {
+		this.rightClicked = rightClicked;
+	}
+	
+	public void setGlow(boolean bool) {
+		this.enchanted = bool;
+	}
+	
+	public boolean isShiftClicked() {
+		return this.shiftClicked;
+	}
+	
+	public boolean isRightClicked() {
+		return rightClicked;
+	}
+	
+	public boolean hasItemAtCursor() {
+		return cursor != null;
+	}
+	
+	public ItemStack getItemAtCursor() {
+		return cursor;
 	}
 
 }

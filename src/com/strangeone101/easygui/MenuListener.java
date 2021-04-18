@@ -1,5 +1,6 @@
-package com.strangeone101.pkconfigeditor;
+package com.strangeone101.easygui;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -9,12 +10,19 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.plugin.Plugin;
 
-import com.strangeone101.pkconfigeditor.gui.MenuBase;
-import com.strangeone101.pkconfigeditor.gui.MenuItem;
-
-public class GUIListener implements Listener
-{
+public class MenuListener implements Listener {
+	
+	private static boolean registered = false;
+	
+	public MenuListener(Plugin plugin) {
+		if (registered) return;
+		
+		registered = true;
+		
+		Bukkit.getPluginManager().registerEvents(this, plugin);
+	}
 	@EventHandler(priority = EventPriority.LOW)
 	public void onMenuItemClicked(InventoryClickEvent event) 
 	{
@@ -32,19 +40,8 @@ public class GUIListener implements Listener
 	                	int index = event.getRawSlot();
 	                    if (index < inventory.getSize()) 
 	                    {
-	                    	if (event.getCursor().getType() != Material.AIR)
-	                    	{
-	                    		event.setCancelled(true);
-	                    		menu.closeMenu(player);
-	                    		player.sendMessage(ChatColor.RED + "The bending gui cannot be tampered with!");
-	                    	}
-	                    	MenuItem item = menu.getMenuItem(index);
-	                    	if (item != null)
-	                    	{
-	                    		item.isShiftClicked = event.isShiftClick();
-	                    		item.onClick(player);
-	                    		event.setCancelled(true);
-	                    	}
+	                    	menu.onMenuClick(player, index, event.getClick(), event.getCursor());
+	                    	event.setCancelled(true);
 	                    }
 	                    else
 	                    {
@@ -57,8 +54,12 @@ public class GUIListener implements Listener
 		catch (Exception e)
 		{
 			event.getWhoClicked().closeInventory();
-			event.getWhoClicked().sendMessage(ChatColor.RED + "An error occured while processing the clickevent. Please report this to your admin or the plugin developer!");
+			event.getWhoClicked().sendMessage(ChatColor.RED + "An error occured while processing the clickevent.");
 			e.printStackTrace();
 		}
     }
+	
+	public static boolean isRegistered() {
+		return registered;
+	}
 }

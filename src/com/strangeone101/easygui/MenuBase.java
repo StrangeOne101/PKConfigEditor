@@ -1,4 +1,4 @@
-package com.strangeone101.pkconfigeditor.gui;
+package com.strangeone101.easygui;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -7,6 +7,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
@@ -22,6 +23,7 @@ public class MenuBase implements InventoryHolder {
     protected String title;
     protected int size;
     protected int lastClickedSlot = -1;
+    protected boolean canBeTamperedWith = true;
     
     public ChatColor GRAY = ChatColor.GRAY;
     
@@ -31,7 +33,7 @@ public class MenuBase implements InventoryHolder {
      */
     public MenuBase(String title, int rows) {
         this.title = title;
-        this.size = rows * 9;
+        this.size = rows <= 0 ? 5 : rows * 9;
     }
 
     /**Adds an item to the menu at the specified position*/
@@ -41,37 +43,20 @@ public class MenuBase implements InventoryHolder {
 
     /**Adds an item to the menu at the specified index.*/
     public boolean addMenuItem(MenuItem item, int index) {
-        ItemStack slot = getInventory().getItem(index);
-        if (slot != null && slot.getType() != Material.AIR) {
-            return false;
-        }
-        //getInventory().setItem(index, item.getItemStack());
-        /*net.minecraft.server.v1_8_R3.ItemStack stack = CraftItemStack.asNMSCopy(item.getItemStack());
-		NBTTagCompound tag = item.getNBTData();
-		stack.setTag(tag);*/
+        //ItemStack slot = getInventory().getItem(index);
+  
         ItemStack stack = item.getItemStack();
-        if (item.isEnchanted)
-        {
-        	//stack = BendingGUI.getNMSManager().addGlow(item.getItemStack());
-        	//stack = BendingGUI.getNMSManager().addGlow(stack);
-        	 
-        	//TODO Fix this
-
-
-        }
-		this.getInventory().setItem(index, stack);
+        this.getInventory().setItem(index, stack);
         items.put(index, item);
         item.setMenu(this);
         return true;
     }
     
-    public void setLastClickedSlot(int slot)
-    {
+    public void setLastClickedSlot(int slot) {
     	this.lastClickedSlot = slot;
     }
     
-    public int getLastClickedSlot() 
-    {
+    public int getLastClickedSlot() {
 		return lastClickedSlot;
 	}
 
@@ -90,6 +75,9 @@ public class MenuBase implements InventoryHolder {
         return true;
     }
     
+    /**
+     * Clears the menu of all items
+     */
     public void clearInventory() {
     	getInventory().clear();
     	items.clear();
@@ -97,13 +85,19 @@ public class MenuBase implements InventoryHolder {
     
     
 
-    /**On click. Called by the main BendingGUI listener*/
-    protected void selectMenuItem(Player player, int index) 
+    /**
+     * Called when the menu is clicked.
+     * 
+     * @param player The player clicking
+     * @param index The Slot clicked
+     * */
+    protected void onMenuClick(Player player, int index, ClickType click, ItemStack cursor) 
     {
         if (items.containsKey(index) && this.getInventory().getItem(index) != null) 
         {
             MenuItem item = items.get(index);
             item.onClick(player);
+            
         }
     }
     
@@ -122,7 +116,8 @@ public class MenuBase implements InventoryHolder {
     {
         if (getInventory().getViewers().contains(player)) 
         {
-            throw new IllegalArgumentException(player.getName() + " is already viewing " + getInventory().getTitle());
+            //throw new IllegalArgumentException(player.getName() + " is already viewing " + getInventory().getTitle());
+        	return;
         }
         player.openInventory(getInventory());
     }

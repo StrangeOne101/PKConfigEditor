@@ -34,7 +34,10 @@ public class ConfigCommandBase extends PKCommand {
 			return;
 		}
 		
-		if (args.size() == 0 || (args.size() == 1 && !args.get(0).equalsIgnoreCase("gui"))) {
+		new ConfigMenu((Player) sender, null);
+		return;
+		
+		/*if (args.size() == 0 || (args.size() == 1 && !args.get(0).equalsIgnoreCase("gui"))) {
 			help(sender, false);
 			sender.sendMessage(ChatColor.RED + "If you need help, try pressing TAB to autocomplete the command.");
 			return;
@@ -192,7 +195,7 @@ public class ConfigCommandBase extends PKCommand {
 			} else {
 				sender.sendMessage(ChatColor.RED + "Config value not found! Please use TAB to autcomplete the command if you need help.");
 			}
-		}
+		}*/
 		
 		
 	}
